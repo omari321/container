@@ -26,7 +26,7 @@ namespace demo_DI
         {
             if (typeof(T).IsAssignableFrom(typeof(R)))
             {
-                _list.Add(typeof(T));
+                _list.Add(typeof(R));
             }
         }
 
@@ -41,18 +41,17 @@ namespace demo_DI
             foreach(var item in _list)
             {
                 Console.WriteLine(item.GetType());
-                if ((Type)item == typeof(Delegate))
+                if (typeof(Delegate).IsAssignableFrom(item.GetType()))
                 {   
                   
                   return ((Func<T>)item).Invoke();
                 }
-                return (T)Activator.CreateInstance((Type)item);
-                    
+                else if (typeof(T).IsAssignableFrom((Type)item))
+                {
+                   return (T)Activator.CreateInstance((Type)item);
                 }
-            }
-           
-
-            throw new Exception();
+              }
+             throw new Exception();
         }
     }
 }
