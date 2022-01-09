@@ -9,82 +9,50 @@ namespace demo_DI
 {
     public class Container : IoContainer
     {
-        private Dictionary<object, object> _mappings;
+        private List<object> _list;
        
         public Container()
         {
-            _mappings = new Dictionary<object, object>();
+            _list=new List<object>();
         }
         
         public void Register<T>() where T : class
         {
-            foreach(var type in typeof(T).GetInterfaces())
-            {
-                _mappings.Add(typeof(T),type);
-            }
-            
+
+               _list.Add(typeof(T));
         }
 
         public void Register<T, R>() where R : class, T
         {
             if (typeof(T).IsAssignableFrom(typeof(R)))
             {
-                _mappings.Add(typeof(T), typeof(R));
-            }
-            else
-
-            {
-                throw new Exception();
+                _list.Add(typeof(T));
             }
         }
 
             public void Register<T>(Func<T> factory)
         {
-            _mappings.Add(typeof(T), factory);
+            _list.Add(factory);
         }
 
         public T Resolve<T>()
         {
+            Console.WriteLine(typeof(T));
+            foreach(var item in _list)
+            {
+                Console.WriteLine(item.GetType());
+                if ((Type)item == typeof(Delegate))
+                {   
+                  
+                  return ((Func<T>)item).Invoke();
+                }
+                return (T)Activator.CreateInstance((Type)item);
+                    
+                }
+            }
            
-           if (typeof(T).IsClass)
-            {
-                return (T)Activator.CreateInstance(typeof(T));
-            }
-           else 
-            {
-                bool containsValue = _mappings.ContainsValue(typeof(T));
-                bool containsKey = _mappings.ContainsKey(typeof(T));
-                if (containsKey)
-                {
-                    if (  _mappings[typeof(T)] is Delegate)
-                    {
-                        return ((Func<T>)_mappings[typeof(T)]).Invoke();
-                    }
-                    else
-                    {
-                        return (T)Activator.CreateInstance((Type)_mappings[typeof(T)]);
-                    }
-                }
-                else if (containsValue)
-                {
-                    foreach(var t in _mappings.Keys)
-                    {
-                       
-                        if ((Type)_mappings[t]==typeof(T))
-                        {
-                            if ((Type)t == typeof(Delegate))
-                            {
-                                return ((Func<T>)_mappings[t]).Invoke();
-                            }
-                            else
-                            {
-                                return (T)Activator.CreateInstance((Type)t);
-                            }
-                        }
-                    }
-                }
-            }
-           throw new Exception();
+
+            throw new Exception();
         }
     }
 }
