@@ -41,12 +41,12 @@ namespace demo_DI
             foreach(var item in _list)
             {
                 Console.WriteLine(item.GetType());
-                if (typeof(Delegate).IsAssignableFrom(item.GetType()))
+                if ( if (typeof(Delegate).IsAssignableFrom(item.GetType()) && typeof(T).IsAssignableFrom(((Func<object>)item).Invoke().GetType())  ))
                 {   
                   
                   return ((Func<T>)item).Invoke();
                 }
-                else if (typeof(T).IsAssignableFrom((Type)item))
+                else if (!typeof(Delegate).IsAssignableFrom(item.GetType()) && typeof(T).IsAssignableFrom((Type)item))
                 {
                    return (T)Activator.CreateInstance((Type)item);
                 }
